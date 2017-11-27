@@ -1,8 +1,10 @@
 package com.github.leandrolimasi.service;
 
+import com.github.leandrolimasi.dto.AppArgumentsDTO;
 import com.github.leandrolimasi.exception.LogParserException;
 import com.github.leandrolimasi.model.LogEntity;
 import com.github.leandrolimasi.repository.LogRepository;
+import com.github.leandrolimasi.util.Utils;
 import lombok.Builder;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +65,8 @@ public class LogService {
                     .ifPresent(listLogs::add);
         }
 
+        scanner.close();
+
         return listLogs;
     }
 
@@ -78,7 +82,7 @@ public class LogService {
         }
     }
 
-    protected Optional<LogEntity> parseRequestLog(String token) {
+    private Optional<LogEntity> parseRequestLog(String token) {
         log.info(token);
         final String[] tokens = token.split("\\s+");
 
@@ -87,7 +91,7 @@ public class LogService {
         Date requestDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
         final Optional<LogEntity> logEntity = Optional.ofNullable(LogEntity.builder()
-                .requestDate(requestDate).ipAddress(tokens[1]).build());
+                .requestDate(Utils.parseDate(tokens[0]).get()).ipAddress(tokens[1]).build());
 
         return logEntity;
     }
