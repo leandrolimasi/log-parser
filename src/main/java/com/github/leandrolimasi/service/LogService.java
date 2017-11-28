@@ -50,6 +50,13 @@ public class LogService {
 
     }
 
+
+    public Optional<List<LogEntity>> findResquestLogs(AppArgumentsDTO appArguments){
+        return Optional.ofNullable(logRepository.findRangeDateAndThreshold(
+                appArguments.getStartDate(), appArguments.getThreshold()));
+    }
+
+
     private List<LogEntity> mountRequestLogs(File file){
         Scanner scanner = readFile(file);
         return parsRequestLogs(scanner);
@@ -85,10 +92,6 @@ public class LogService {
     private Optional<LogEntity> parseRequestLog(String token) {
         log.info(token);
         final String[] tokens = token.split("\\s+");
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd.HH:mm:ss");
-        LocalDate localDate = LocalDate.parse(tokens[0], formatter);
-        Date requestDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
         final Optional<LogEntity> logEntity = Optional.ofNullable(LogEntity.builder()
                 .requestDate(Utils.parseDate(tokens[0]).get()).ipAddress(tokens[1]).build());

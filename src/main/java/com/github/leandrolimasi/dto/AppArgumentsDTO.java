@@ -24,7 +24,7 @@ public class AppArgumentsDTO {
 
     private Duration duration;
 
-    private Integer threshold;
+    private Long threshold;
 
     private File logFile;
 

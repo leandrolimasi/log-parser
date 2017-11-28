@@ -27,8 +27,9 @@ public class LogParserApplicationRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         log.info("Your application started with arguments :" + args.getOptionNames());
-        Optional<AppArgumentsDTO> appArgumentsDTO = parseAppArgs(args);
-        logService.persistRequestLog(appArgumentsDTO.get().getLogFile());
+        Optional<AppArgumentsDTO> appArguments = parseAppArgs(args);
+        appArguments.map(AppArgumentsDTO::getLogFile).ifPresent(logService::persistRequestLog);
+        appArguments.ifPresent(logService::findResquestLogs);
     }
 
 
@@ -42,8 +43,8 @@ public class LogParserApplicationRunner implements ApplicationRunner {
 
         if (!args.containsOption("logfile") ||
                 !args.containsOption("startDate") ||
-                args.containsOption("duration") ||
-                args.containsOption("threshold")) {
+                !args.containsOption("duration") ||
+                !args.containsOption("threshold")) {
             return Optional.empty();
         }
 
@@ -64,10 +65,10 @@ public class LogParserApplicationRunner implements ApplicationRunner {
                                 "hourly or daily."
                 ));
 
-        final Integer threshold = Optional.of(args.getOptionValues("threshold").get(0))
+        final Long threshold = Optional.of(args.getOptionValues("threshold").get(0))
                 .filter(text -> !text.isEmpty())
                 .filter(text -> text.matches("\\d+"))
-                .map(Integer::parseInt)
+                .map(Long::parseLong)
                 .filter(val -> val > 0)
                 .orElseThrow(() -> new LogParserException(
                         "The argument threshold is missing or invalid. Specify a natural value" +
