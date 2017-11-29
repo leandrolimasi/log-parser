@@ -1,20 +1,20 @@
 package com.github.leandrolimasi;
 
-import com.github.leandrolimasi.dto.AppArgumentsDTO;
+import com.github.leandrolimasi.dto.AppArgumentsRequest;
+import com.github.leandrolimasi.dto.LogResponse;
 import com.github.leandrolimasi.enums.Duration;
 import com.github.leandrolimasi.exception.LogParserException;
 import com.github.leandrolimasi.service.LogService;
 import com.github.leandrolimasi.util.Utils;
+import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import lombok.extern.log4j.Log4j;
-
 import java.io.File;
 import java.util.Date;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -27,9 +27,13 @@ public class LogParserApplicationRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         log.info("Your application started with arguments :" + args.getOptionNames());
-        Optional<AppArgumentsDTO> appArguments = parseAppArgs(args);
-        appArguments.map(AppArgumentsDTO::getLogFile).ifPresent(logService::persistRequestLog);
-        appArguments.ifPresent(logService::findResquestLogs);
+        Optional<AppArgumentsRequest> appArguments = parseAppArgs(args);
+        appArguments.map(AppArgumentsRequest::getLogFile).ifPresent(logService::persistRequestLog);
+        if (appArguments.isPresent()){
+            Optional<List<LogResponse>> logResponse = logService.findResquestLogs(appArguments.get());
+            logResponse.ifPresent(logService::printRequestLogsFiltered);
+        }
+
     }
 
 
@@ -39,7 +43,7 @@ public class LogParserApplicationRunner implements ApplicationRunner {
      * @return
      * @throws LogParserException
      */
-    private Optional<AppArgumentsDTO> parseAppArgs(ApplicationArguments args) throws LogParserException {
+    private Optional<AppArgumentsRequest> parseAppArgs(ApplicationArguments args) throws LogParserException {
 
         if (!args.containsOption("logfile") ||
                 !args.containsOption("startDate") ||
@@ -84,7 +88,7 @@ public class LogParserApplicationRunner implements ApplicationRunner {
                         "The specified log file cannot be read"
                 ));
 
-        return Optional.of(AppArgumentsDTO.builder()
+        return Optional.of(AppArgumentsRequest.builder()
                 .startDate(startDate).duration(duration).threshold(threshold).logFile(logFile).build());
     }
 }
