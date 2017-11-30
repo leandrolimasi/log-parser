@@ -7,7 +7,6 @@ import com.github.leandrolimasi.exception.LogParserException;
 import com.github.leandrolimasi.model.LogEntity;
 import com.github.leandrolimasi.repository.LogRepository;
 import com.github.leandrolimasi.service.LogService;
-import com.oracle.tools.packager.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +27,6 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
