@@ -32,7 +32,7 @@ public class LogService {
      * @param file
      * @return
      */
-    public void persistRequestLog(File file){
+    public List<LogEntity> persistRequestLog(File file){
 
         List<LogEntity> requestLogs = mountRequestLogs(file);
 
@@ -46,6 +46,8 @@ public class LogService {
                 log.error(e);
             }
         });
+
+        return requestLogs;
 
     }
 
@@ -130,7 +132,7 @@ public class LogService {
         final String[] tokens = token.split("\\s+");
 
         final Optional<LogEntity> logEntity = Optional.ofNullable(LogEntity.builder()
-                .requestDate(Utils.parseDate(tokens[0]).get()).ipAddress(tokens[1]).build());
+                .requestDate(Utils.parseDate(tokens[0]).get()).ipAddress(Utils.validateIpv4Address(tokens[1])).build());
 
         return logEntity;
     }
